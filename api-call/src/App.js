@@ -5,34 +5,38 @@ function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch("https://jsonplaceholder.typicode.com/users");
-        if (!res.ok) {
-          throw new Error("http response ");
-        }
-        const result = await res.json();
-        setData(result);
-      } catch (error) {
-        // This block catches network errors or the error thrown above
-        console.error("Error fetching data:", error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
+
+  async function fetchData() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("https://jsonplaceholder.typicode.com/users");
+      if (!res.ok) {
+        throw new Error(`HTTP Error: ${res.status}`);
       }
+      const result = await res.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchData();
   }, []);
   if (loading) return <p>Loading...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>; // Display user-friendly error
   return (
     <div className="App">
-      {data.map((u) => (
-        <div key={u.id}>
-          {u.name} - {u.email}
-        </div>
-      ))}
+      <button onClick={fetchData}>Refresh Data</button>
+      <ul>
+        {data.map((user) => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
     </div>
   );
 }
